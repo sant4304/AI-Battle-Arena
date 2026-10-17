@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Optimization — Notes by Sheryians Coding School</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,wght@0,300;0,600;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #0E0F14;
+  --paper:     #F5F2EB;
+  --paper2:    #EDE9DF;
+  --paper3:    #E4DFD3;
+  --rule:      #D4CEBC;
+  --muted:     #6B6455;
+
+  --accent:    #C84B1F;
+  --accent2:   #1A6B4A;
+  --accent3:   #1B4587;
+  --gold:      #B8860B;
+
+  --code-bg:   #1A1C24;
+  --code-text: #E2DCCC;
+
+  --flag-c:    #5BA4CF;
+  --val-c:     #F4A261;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  font-family: 'DM Sans', sans-serif;
+  color: #2A2720;
+}
+
+.layout { display: flex; min-height: 100vh; }
+
+/* ---------- NAV ---------- */
+nav {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--ink);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 32px 0 40px;
+}
+
+.nav-brand { padding: 0 24px 24px; }
+.nav-brand .logo { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: white; }
+.nav-brand .logo span { color: var(--accent); }
+.nav-brand .sub {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.35); letter-spacing: 0.06em; margin-top: 4px;
+}
+
+.nav-group-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  color: rgba(255,255,255,0.25); letter-spacing: 0.12em;
+  text-transform: uppercase; padding: 18px 24px 6px;
+}
+
+nav a {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 12.5px;
+  color: rgba(255,255,255,0.5); text-decoration: none;
+  padding: 9px 24px; border-left: 2px solid transparent;
+}
+nav a:hover { color: white; background: rgba(255,255,255,0.04); }
+nav a.active { color: white; border-left-color: var(--accent); background: rgba(200,75,31,0.08); }
+
+.nav-num {
+  width: 18px; height: 18px; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.6);
+}
+nav a:hover .nav-num, nav a.active .nav-num { background: var(--accent); color: white; }
+
+/* ---------- MAIN ---------- */
+main {
+  flex: 1;
+  max-width: calc(99% - 256px);
+  padding: 56px 56px 80px;
+}
+
+@media (max-width: 768px) {
+  nav { display: none; }
+  main { padding: 32px 24px 60px; max-width: 100%; }
+}
+
+/* ---------- HERO ---------- */
+.hero { margin-bottom: 64px; padding-bottom: 40px; border-bottom: 1px solid var(--rule); }
+.hero-eyebrow {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px;
+}
+.hero h1 {
+  font-family: 'Fraunces', serif; font-size: clamp(36px, 5vw, 58px);
+  font-weight: 900; line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 18px;
+  color: var(--ink);
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero-desc { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.65; margin-bottom: 18px; }
+.hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero-tag {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+  border: 1px solid var(--rule); border-radius: 20px; padding: 5px 12px;
+}
+
+/* ---------- SECTION ---------- */
+.section { margin-bottom: 72px; animation: fadeUp 0.4s ease both; scroll-margin-top: 24px; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.section-header { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 28px; }
+.section-num-big { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 900; color: var(--rule); user-select: none; line-height: 1; }
+.section-title { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.section-subtitle { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin: 28px 0 12px; }
+h4 { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 20px 0 10px; }
+p { font-family: 'DM Sans', sans-serif; font-size: 14.5px; line-height: 1.7; color: #2A2720; margin-bottom: 12px; }
+ul, ol { font-size: 14.5px; line-height: 1.8; color: #2A2720; padding-left: 20px; margin-bottom: 14px; }
+li { margin-bottom: 4px; }
+strong { color: var(--ink); }
+
+code {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--accent);
+  background: var(--paper3); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 6px;
+}
+
+/* ---------- WHY BOX ---------- */
+.why {
+  background: #EFF6F1; border-left: 3px solid var(--accent2);
+  border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0;
+}
+.why-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--accent2);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
+}
+.why p { font-size: 14px; color: var(--ink); line-height: 1.65; margin: 0; }
+
+/* ---------- CONCEPT BOX ---------- */
+.concept {
+  background: var(--paper2); border-left: 3px solid var(--accent3);
+  border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0;
+}
+.concept-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--accent3);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px;
+}
+.concept p { font-size: 14px; color: var(--ink); line-height: 1.65; margin: 0; }
+
+/* ---------- NOTE BOX ---------- */
+.note {
+  background: #FEF9EC; border: 1px solid #EDD97A; border-radius: 8px;
+  padding: 14px 18px; margin: 16px 0; display: flex; gap: 10px; align-items: flex-start;
+}
+.note p { font-size: 13px; color: #5C4A00; margin: 0; }
+.note p strong { color: #3D3000; }
+.note-icon { font-size: 16px; line-height: 1.4; }
+
+/* ---------- WARNING BOX ---------- */
+.warn {
+  background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px;
+  padding: 14px 18px; margin: 16px 0; display: flex; gap: 10px; align-items: flex-start;
+}
+.warn p { font-size: 13px; color: #7F1D1D; margin: 0; }
+.warn p strong { color: #7F1D1D; }
+
+/* ---------- STEP LABEL ---------- */
+.step-label {
+  display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600;
+  color: white; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 10px; border-radius: 4px;
+  background: var(--accent); margin: 10px 0 8px;
+}
+.step-label.green { background: var(--accent2); }
+.step-label.blue { background: var(--accent3); }
+.step-label.gold { background: var(--gold); }
+
+/* ---------- CODE BLOCK ---------- */
+.code-wrap { background: var(--code-bg); border-radius: 10px; overflow: hidden; margin: 16px 0; }
+.code-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.code-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; }
+.copy-btn {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.06); border: none; border-radius: 4px; padding: 3px 10px; cursor: pointer;
+}
+.copy-btn:hover { color: white; background: rgba(255,255,255,0.14); }
+.code-wrap pre {
+  margin: 0; padding: 16px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;
+  color: var(--code-text); line-height: 1.8; overflow-x: auto;
+}
+.c-cmd { color: #87CEEB; font-weight: bold; }
+.c-flag { color: var(--flag-c); }
+.c-val { color: var(--val-c); }
+.c-str { color: #98C379; }
+.c-comment { color: rgba(255,255,255,0.28); font-style: italic; }
+.c-key { color: #C678DD; }
+.c-pipe { color: #E5C07B; }
+
+/* ---------- TABLES ---------- */
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.flag-table th, .compare th { text-align: left; padding: 10px 14px; }
+.flag-table th { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; background: var(--paper3); }
+.flag-table td { padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+.flag-table tr:hover { background: var(--paper2); }
+.f-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: var(--flag-c); }
+.f-val { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--val-c); }
+.f-desc { font-size: 13px; color: var(--ink); }
+.f-why { font-size: 12px; color: var(--muted); }
+
+.compare th { background: var(--ink); color: white; font-weight: 600; }
+.compare th:first-child { border-radius: 8px 0 0 0; }
+.compare th:last-child { border-radius: 0 8px 0 0; }
+.compare td { padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+.row-label { font-weight: 600; color: var(--ink); }
+.local-val { color: var(--muted); }
+.eks-val { color: var(--accent2); font-weight: 500; }
+
+/* ---------- FLOW DIAGRAM ---------- */
+.flow { margin: 20px 0; }
+.flow-step { display: flex; gap: 16px; }
+.flow-line { display: flex; flex-direction: column; align-items: center; }
+.flow-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.flow-connector { width: 2px; flex: 1; background: var(--rule); min-height: 30px; }
+.flow-content { padding-bottom: 24px; }
+.flow-title { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--ink); }
+.flow-detail { font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+/* ---------- SCALE DIAGRAM ---------- */
+.scale-diagram {
+  background: var(--paper2); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 16px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 2; color: var(--muted); margin: 16px 0;
+}
+.scale-diagram .hi { color: var(--ink); font-weight: bold; }
+.scale-diagram .green { color: var(--accent2); }
+.scale-diagram .red { color: var(--accent); }
+
+hr.divider { border: none; border-top: 1px solid var(--rule); margin: 40px 0; }
+
+/* ---------- WATERMARK ---------- */
+.watermark {
+  position: fixed; bottom: 20px; right: 20px;
+  background: rgba(14, 15, 20, 0.90);
+  border: 1px solid rgba(200, 75, 31, 0.3);
+  border-radius: 8px; padding: 6px 12px;
+  backdrop-filter: blur(4px); z-index: 50;
+  display: flex; align-items: center; gap: 8px;
+  pointer-events: none;
+}
+.watermark-logo { width: 16px; height: 16px; border-radius: 3px; }
+.watermark-text {
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px;
+  color: rgba(255, 255, 255, 0.45); letter-spacing: 0.08em;
+}
+
+footer {
+  border-top: 2px solid var(--rule); margin-top: 40px; padding-top: 16px;
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav>
+  <div class="nav-brand">
+    <div class="logo">React<span>.</span>Perf</div>
+    <div class="sub">Sheryians Coding School</div>
+  </div>
+
+  <div class="nav-group-label">Foundations</div>
+  <a href="#rerender"><span class="nav-num">1</span>Re-rendering</a>
+  <a href="#vdom"><span class="nav-num">2</span>Virtual DOM &amp; Diffing</a>
+  <a href="#profiling"><span class="nav-num">3</span>Profiling First</a>
+
+  <div class="nav-group-label">Memoization Toolkit</div>
+  <a href="#memo"><span class="nav-num">4</span>React.memo()</a>
+  <a href="#usememo"><span class="nav-num">5</span>useMemo()</a>
+  <a href="#usecallback"><span class="nav-num">6</span>useCallback()</a>
+  <a href="#inline"><span class="nav-num">7</span>Avoid Inline Functions</a>
+
+  <div class="nav-group-label">Loading &amp; Bundling</div>
+  <a href="#lazy"><span class="nav-num">8</span>Lazy Loading &amp; Splitting</a>
+  <a href="#suspense"><span class="nav-num">9</span>Suspense &amp; Error Boundaries</a>
+  <a href="#bundle"><span class="nav-num">10</span>Bundle Size</a>
+
+  <div class="nav-group-label">Lists &amp; Rendering</div>
+  <a href="#keys"><span class="nav-num">11</span>Key Prop Optimization</a>
+  <a href="#virtualization"><span class="nav-num">12</span>List Virtualization</a>
+
+  <div class="nav-group-label">State &amp; Events</div>
+  <a href="#state"><span class="nav-num">13</span>State Management</a>
+  <a href="#context"><span class="nav-num">14</span>Context API</a>
+  <a href="#debounce"><span class="nav-num">15</span>Debounce &amp; Throttle</a>
+
+  <div class="nav-group-label">APIs &amp; Data</div>
+  <a href="#api"><span class="nav-num">16</span>API Optimization</a>
+  <a href="#reactquery"><span class="nav-num">17</span>React Query</a>
+
+  <div class="nav-group-label">Assets &amp; Vitals</div>
+  <a href="#images"><span class="nav-num">18</span>Image Optimization</a>
+  <a href="#webvitals"><span class="nav-num">19</span>Web Vitals</a>
+
+  <div class="nav-group-label">Concurrent React</div>
+  <a href="#transitions"><span class="nav-num">20</span>Transitions &amp; Deferred</a>
+  <a href="#ssr"><span class="nav-num">21</span>SSR, Hydration &amp; Concurrency</a>
+
+  <div class="nav-group-label">Wrapping Up</div>
+  <a href="#jsperf"><span class="nav-num">22</span>JS Performance Basics</a>
+  <a href="#component-design"><span class="nav-num">23</span>Component Design</a>
+  <a href="#checklist"><span class="nav-num">24</span>Interview Checklist</a>
+</nav>
+
+<main>
+
+  <div class="hero">
+    <div class="hero-eyebrow">Beginner Friendly Notes</div>
+    <h1>React Optimization, <em>explained simply.</em></h1>
+    <p class="hero-desc">Why your components re-render, which hooks actually help, and how real teams keep a React app fast — explained with plain words and practical, everyday examples.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">🌱 No prior experience needed</span>
+      <span class="hero-tag">🧠 Simple language</span>
+      <span class="hero-tag">⚡ Real-world examples</span>
+    </div>
+  </div>
+
+  <div class="note" style="margin-bottom:48px;">
+    <div class="note-icon">📏</div>
+    <p><strong>Golden Rule, before anything else:</strong> never optimize without measuring first. Open React DevTools → Profiler and find your actual bottleneck before reaching for <code>memo</code>, <code>useMemo</code>, or anything else in this note.</p>
+  </div>
+
+  <!-- ================= SECTION 1 ================= -->
+  <section class="section" id="rerender">
+    <div class="section-header">
+      <div class="section-num-big">01</div>
+      <div class="section-title-block">
+        <div class="section-title">Re-rendering in React</div>
+        <div class="section-subtitle">What actually triggers a component to run again</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>You can't fix a performance problem you don't understand. Almost every React optimization technique exists to control <strong>when and why</strong> a component re-renders — so this is the concept everything else in this note builds on.</p>
+    </div>
+
+    <p>A <strong>re-render</strong> happens whenever React runs a component's function again to check if the UI needs to change. It doesn't necessarily mean the actual webpage changes — it just means React is re-checking.</p>
+
+    <h3>What causes a re-render?</h3>
+    <ul>
+      <li>State changes — <code>useState</code>, <code>useReducer</code></li>
+      <li>Props change</li>
+      <li>The parent component re-renders</li>
+      <li>Context value changes</li>
+    </ul>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">App.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> App = () => {
+  <span class="c-key">const</span> [count, setCount] = useState(<span class="c-val">0</span>);
+
+  <span class="c-key">return</span> (
+    <span class="c-pipe">&lt;&gt;</span>
+      <span class="c-pipe">&lt;Child /&gt;</span>
+      <span class="c-pipe">&lt;button</span> <span class="c-flag">onClick</span>=<span class="c-str">{() => setCount(count + 1)}</span><span class="c-pipe">&gt;</span>
+        Increment
+      <span class="c-pipe">&lt;/button&gt;</span>
+    <span class="c-pipe">&lt;/&gt;</span>
+  );
+};</pre>
+    </div>
+
+    <p>When <code>count</code> changes: <code>App</code> re-renders (expected — its own state changed), and <code>Child</code> <strong>also</strong> re-renders, even though nothing about <code>Child</code> actually changed. That's the exact problem most of this note is about solving.</p>
+
+    <div class="concept">
+      <div class="concept-label">Key Concept</div>
+      <p>A parent re-rendering does <strong>not</strong> always mean the real DOM changes. React first compares the previous and new Virtual DOM (see Section 2) and only touches the real page where something actually differs.</p>
+    </div>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p><strong>Interview tip:</strong> "Does re-rendering always update the DOM?" — No. Re-rendering is React re-running your component function; DOM updates only happen where the diffing algorithm finds a real difference.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2 ================= -->
+  <section class="section" id="vdom">
+    <div class="section-header">
+      <div class="section-num-big">02</div>
+      <div class="section-title-block">
+        <div class="section-title">Virtual DOM &amp; Diffing</div>
+        <div class="section-subtitle">Why React doesn't touch the real page on every change</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Directly updating the real browser DOM is slow — every change can trigger layout recalculation and repainting. The Virtual DOM exists so React can figure out the <strong>minimum</strong> set of real changes needed, instead of redrawing everything on every state update.</p>
+    </div>
+
+    <p>Think of the Virtual DOM like a rough draft. React makes all its changes on a lightweight in-memory copy of the page first, compares that draft to the previous one (this comparison is called <strong>diffing</strong>), and only then applies the differences to the real DOM — a process called <strong>reconciliation</strong>.</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+        <div class="flow-content"><div class="flow-title">State/props change</div><div class="flow-detail">React re-runs the component function.</div></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+        <div class="flow-content"><div class="flow-title">New Virtual DOM created</div><div class="flow-detail">A fresh lightweight in-memory tree is built.</div></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot"></div><div class="flow-connector"></div></div>
+        <div class="flow-content"><div class="flow-title">Diffing</div><div class="flow-detail">React compares old vs new Virtual DOM trees.</div></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-line"><div class="flow-dot" style="background:var(--accent2)"></div></div>
+        <div class="flow-content"><div class="flow-title">Reconciliation</div><div class="flow-detail">Only the real, changed elements get updated on the actual page.</div></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>This is why changing one line of text in a huge list doesn't repaint the whole list — React's diffing finds that single changed node and updates only that.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 3 ================= -->
+  <section class="section" id="profiling">
+    <div class="section-header">
+      <div class="section-num-big">03</div>
+      <div class="section-title-block">
+        <div class="section-title">Profiling First</div>
+        <div class="section-subtitle">Finding the real bottleneck before touching any code</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Optimization techniques like <code>memo</code> and <code>useMemo</code> have their own costs (extra comparisons, extra memory). Applying them everywhere "just in case" can actually make things slower. Profiling tells you exactly where time is really being spent, so you only optimize what's worth optimizing.</p>
+    </div>
+
+    <p>React DevTools includes a <strong>Profiler</strong> tab. Recording a session while you interact with your app shows you exactly which components rendered, how long each took, and — critically — <em>why</em> each one re-rendered.</p>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">Record</span></td><td><span class="f-val">●</span></td><td class="f-desc">Starts capturing render timings for every component during your interaction.</td></tr>
+        <tr><td><span class="f-name">Ranked chart</span></td><td><span class="f-val">—</span></td><td class="f-desc">Shows components sorted slowest-to-fastest for the recorded commit.</td></tr>
+        <tr><td><span class="f-name">"Why did this render?"</span></td><td><span class="f-val">—</span></td><td class="f-desc">Tells you exactly which prop, state, or context triggered a specific re-render.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <div class="note-icon">⚠️</div>
+      <p>A very common beginner mistake: wrapping every single component in <code>React.memo()</code> without ever profiling first. This adds comparison overhead everywhere, including on cheap components that were never actually slow.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4 ================= -->
+  <section class="section" id="memo">
+    <div class="section-header">
+      <div class="section-num-big">04</div>
+      <div class="section-title-block">
+        <div class="section-title">React.memo()</div>
+        <div class="section-subtitle">Skipping re-renders when props haven't actually changed</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>By default, a child re-renders every time its parent does — even if the child's own props are identical. On an expensive component (say, a chart or a large table row), that's wasted work happening dozens of times a second. <code>React.memo()</code> lets React skip re-rendering when nothing relevant has changed.</p>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Child.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> Child = React.memo(<span class="c-key">function</span> Child() {
+  <span class="c-key">return</span> <span class="c-pipe">&lt;h1&gt;</span>Child<span class="c-pipe">&lt;/h1&gt;</span>;
+});</pre>
+    </div>
+
+    <p>React performs a <strong>shallow comparison</strong> of the component's props. If they're the same as last time, React skips re-running that component entirely.</p>
+
+    <h3>When to use it</h3>
+    <ul>
+      <li>The component receives props</li>
+      <li>Those props rarely change</li>
+      <li>Rendering that component is genuinely expensive</li>
+    </ul>
+
+    <div class="warn">
+      <div class="note-icon">⚠️</div>
+      <p>Do <strong>not</strong> use <code>React.memo()</code> everywhere. It has its own comparison cost, and if the props change on almost every render anyway (like a live typing value), memo does nothing but add overhead.</p>
+    </div>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p><code>React.memo()</code> only helps if the props are actually the same object/value as before — which is exactly why it's so often paired with <code>useCallback</code> and <code>useMemo</code> (next two sections).</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 5 ================= -->
+  <section class="section" id="usememo">
+    <div class="section-header">
+      <div class="section-num-big">05</div>
+      <div class="section-title-block">
+        <div class="section-title">useMemo()</div>
+        <div class="section-subtitle">Caching the result of an expensive calculation</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Every re-render normally re-runs every line inside a component — including expensive calculations that don't actually need to happen again. <code>useMemo</code> caches a computed value and only recalculates it when its actual dependencies change.</p>
+    </div>
+
+    <p>Imagine a product list with thousands of items, and you're filtering only the "active" ones on every render:</p>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">UserList.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> filteredUsers = useMemo(() => {
+  <span class="c-key">return</span> users.filter(user => user.active);
+}, [users]);</pre>
+    </div>
+
+    <p>Without <code>useMemo</code>, this filter runs on <em>every single re-render</em> — even ones caused by something unrelated, like a modal opening. With it, the filter only re-runs when <code>users</code> actually changes.</p>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">useMemo(fn, deps)</span></td><td><span class="f-val">[users]</span></td><td class="f-desc">Re-runs fn only when a value in the dependency array changes; otherwise returns the cached result.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <div class="note-icon">⚠️</div>
+      <p>Avoid using <code>useMemo</code> for simple, cheap calculations like <code>a + b</code>. The memoization bookkeeping itself can cost more than just recalculating the value directly.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 6 ================= -->
+  <section class="section" id="usecallback">
+    <div class="section-header">
+      <div class="section-num-big">06</div>
+      <div class="section-title-block">
+        <div class="section-title">useCallback()</div>
+        <div class="section-subtitle">Keeping a function reference stable across renders</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>In JavaScript, a new function is a completely new value every time it's created — even if the code inside looks identical. That means passing a plain function as a prop to a <code>React.memo()</code> child breaks the memoization, because the prop "changed" every render. <code>useCallback</code> fixes that by reusing the same function reference.</p>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Parent.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> handleClick = useCallback(() => {
+  console.log(<span class="c-str">"Clicked"</span>);
+}, []);</pre>
+    </div>
+
+    <div class="concept">
+      <div class="concept-label">Key Concept</div>
+      <p><code>useCallback</code> is really just <code>useMemo</code> for functions instead of values. It's most useful specifically when that function is passed down as a prop to a component wrapped in <code>React.memo()</code>.</p>
+    </div>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p><strong>Interview tip:</strong> "Why doesn't React.memo() work even though I didn't change any props?" — Usually because an inline function or object prop is being recreated on every render. <code>useCallback</code> / <code>useMemo</code> are the fix.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 7 ================= -->
+  <section class="section" id="inline">
+    <div class="section-header">
+      <div class="section-num-big">07</div>
+      <div class="section-title-block">
+        <div class="section-title">Avoid Inline Functions &amp; Objects</div>
+        <div class="section-subtitle">A small habit that keeps memoization actually working</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Writing <code>onClick={() => handleClick()}</code> silently creates a brand-new function on every single render. If that prop goes into a memoized child, it defeats the whole point of memoizing it — the child re-renders anyway.</p>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Before &amp; After</span></div>
+      <pre><span class="c-comment">// Avoid</span>
+<span class="c-pipe">&lt;button</span> <span class="c-flag">onClick</span>=<span class="c-str">{() => handleClick()}</span> <span class="c-pipe">/&gt;</span>
+
+<span class="c-comment">// Prefer</span>
+<span class="c-pipe">&lt;button</span> <span class="c-flag">onClick</span>=<span class="c-str">{handleClick}</span> <span class="c-pipe">/&gt;</span></pre>
+    </div>
+
+    <p>The same idea applies to inline objects and arrays passed as props — <code>style={{ color: 'red' }}</code> creates a new object every render, too. Pull it into a variable (or <code>useMemo</code> it) if it's going into a memoized child.</p>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>This is a small habit, but it's exactly what makes <code>useCallback</code> and <code>React.memo()</code> actually pay off, instead of silently doing nothing.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 8 ================= -->
+  <section class="section" id="lazy">
+    <div class="section-header">
+      <div class="section-num-big">08</div>
+      <div class="section-title-block">
+        <div class="section-title">Lazy Loading &amp; Code Splitting</div>
+        <div class="section-subtitle">Only download the code a user actually needs, right now</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>By default, a bundler ships your <strong>entire</strong> app as one giant JavaScript file — including the admin dashboard a regular visitor will never open. Lazy loading and code splitting break that bundle into chunks, downloaded only when actually needed, so the first page load is much faster.</p>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">App.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> About = lazy(() => <span class="c-cmd">import</span>(<span class="c-str">"./About"</span>));</pre>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">App.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-pipe">&lt;Suspense</span> <span class="c-flag">fallback</span>=<span class="c-str">{&lt;h2&gt;Loading...&lt;/h2&gt;}</span><span class="c-pipe">&gt;</span>
+  <span class="c-pipe">&lt;About /&gt;</span>
+<span class="c-pipe">&lt;/Suspense&gt;</span></pre>
+    </div>
+
+    <h3>Common code-splitting approaches</h3>
+    <ul>
+      <li><code>React.lazy()</code> — split at the component level</li>
+      <li>Dynamic <code>import()</code> — split at the module level</li>
+      <li>Route-based splitting — load a whole page's code only when that route is visited</li>
+    </ul>
+
+    <table class="compare">
+      <thead><tr><th>What</th><th>Without lazy loading</th><th>With lazy loading</th></tr></thead>
+      <tbody>
+        <tr><td class="row-label">Initial bundle</td><td class="local-val">Everything, including unused pages</td><td class="eks-val">Only what the first screen needs</td></tr>
+        <tr><td class="row-label">First load speed</td><td class="local-val">Slower</td><td class="eks-val">Faster</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Route-based splitting (one chunk per page) is usually the highest-impact, easiest place to start in a real app.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 9 ================= -->
+  <section class="section" id="suspense">
+    <div class="section-header">
+      <div class="section-num-big">09</div>
+      <div class="section-title-block">
+        <div class="section-title">Suspense &amp; Error Boundaries</div>
+        <div class="section-subtitle">Handling "still loading" and "something broke" gracefully</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Lazy-loaded components and async data need <em>something</em> to show while they're not ready yet — and a single broken component shouldn't be allowed to crash your entire app for every user. Suspense and Error Boundaries solve those two problems respectively.</p>
+    </div>
+
+    <h3>Suspense — showing a fallback while waiting</h3>
+    <p>Used together with lazy loading and async rendering, <code>&lt;Suspense&gt;</code> displays a fallback UI (like a spinner) until its children are ready.</p>
+
+    <h3>Error Boundaries — containing crashes</h3>
+    <p>A rendering error inside one component (say, a broken third-party widget) shouldn't take down your whole page. An Error Boundary catches it and shows a fallback instead.</p>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">ErrorBoundary.jsx</span></div>
+      <pre><span class="c-key">class</span> ErrorBoundary <span class="c-key">extends</span> React.Component {
+  <span class="c-comment">// implements componentDidCatch / getDerivedStateFromError</span>
+  <span class="c-comment">// renders a fallback UI instead of crashing the app</span>
+}</pre>
+    </div>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Error Boundaries only catch errors during <strong>rendering</strong> — not in event handlers, async code, or server-side rendering. Those still need their own try/catch.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 10 ================= -->
+  <section class="section" id="bundle">
+    <div class="section-header">
+      <div class="section-num-big">10</div>
+      <div class="section-title-block">
+        <div class="section-title">Bundle Size Optimization</div>
+        <div class="section-subtitle">Shipping less JavaScript to the browser</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Every kilobyte of JavaScript has to be downloaded, parsed, and executed before your app becomes interactive — especially painful on slow mobile connections. A smaller bundle means a faster app for everyone, not just users on fast Wi-Fi.</p>
+    </div>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">Tree shaking</span></td><td><span class="f-val">automatic</span></td><td class="f-desc">Removes code that's imported but never actually used.</td></tr>
+        <tr><td><span class="f-name">Code splitting</span></td><td><span class="f-val">manual/automatic</span></td><td class="f-desc">Breaks the bundle into chunks loaded only when needed.</td></tr>
+        <tr><td><span class="f-name">Remove unused packages</span></td><td><span class="f-val">manual audit</span></td><td class="f-desc">Deletes dependencies you installed but stopped using.</td></tr>
+        <tr><td><span class="f-name">Dynamic imports</span></td><td><span class="f-val">import()</span></td><td class="f-desc">Loads a module only at the moment it's actually needed.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Tools to help</h3>
+    <ul>
+      <li><strong>Vite</strong> — fast bundler with sensible defaults out of the box</li>
+      <li><strong>Webpack Bundle Analyzer</strong> — visualizes exactly what's taking up space in your bundle</li>
+    </ul>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Before optimizing blindly, run a bundle analyzer first — it's common to discover one unused library is quietly responsible for half your bundle size.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 11 ================= -->
+  <section class="section" id="keys">
+    <div class="section-header">
+      <div class="section-num-big">11</div>
+      <div class="section-title-block">
+        <div class="section-title">Key Prop Optimization</div>
+        <div class="section-subtitle">Helping React tell list items apart correctly</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>React uses the <code>key</code> prop to match list items between renders. Get it wrong, and React can confuse which item is which — causing subtle bugs like input fields losing focus, wrong items animating, or state attaching to the wrong row.</p>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Bad vs Good</span></div>
+      <pre><span class="c-comment">// Bad — index changes when the list reorders</span>
+<span class="c-flag">key</span>=<span class="c-str">{index}</span>
+
+<span class="c-comment">// Good — stable, unique, tied to the actual data</span>
+<span class="c-flag">key</span>=<span class="c-str">{item.id}</span></pre>
+    </div>
+
+    <p>Say you have a to-do list and the user deletes item #2. With <code>key={index}</code>, every item after it shifts up one index — React thinks item #3 became item #2, and can mismatch state (like which checkbox is checked). With <code>key={item.id}</code>, each item keeps its true identity no matter how the list changes.</p>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Stable keys let React's diffing algorithm efficiently reuse existing DOM nodes instead of destroying and recreating them — better performance and fewer bugs, from one small prop.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 12 ================= -->
+  <section class="section" id="virtualization">
+    <div class="section-header">
+      <div class="section-num-big">12</div>
+      <div class="section-title-block">
+        <div class="section-title">List Rendering Optimization (Virtualization)</div>
+        <div class="section-subtitle">Only render what's actually visible on screen</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Rendering 10,000 rows in the DOM at once — even if only 15 are visible in the viewport — wastes memory and rendering time on rows nobody can even see. Virtualization renders only the visible rows (plus a small buffer), no matter how huge the underlying list is.</p>
+    </div>
+
+    <p>Imagine a chat app with 50,000 messages. Without virtualization, scrolling to the bottom means the browser has already built and is tracking 50,000 DOM nodes. With virtualization, it might only ever build ~20 at a time — swapping content in and out as you scroll.</p>
+
+    <h3>Popular libraries</h3>
+    <ul>
+      <li><strong>react-window</strong> — lightweight, minimal API</li>
+      <li><strong>react-virtualized</strong> — more features, larger bundle</li>
+    </ul>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Rule of thumb: if a list can realistically grow past a few hundred items (chat logs, product catalogs, spreadsheets), virtualization is worth adding from the start.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 13 ================= -->
+  <section class="section" id="state">
+    <div class="section-header">
+      <div class="section-num-big">13</div>
+      <div class="section-title-block">
+        <div class="section-title">State Management Optimization</div>
+        <div class="section-subtitle">Keeping state exactly where it needs to be — no further</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>State that lives higher up the tree than it needs to causes every component below it to re-render whenever it changes — even components that don't care about that value. Keeping state local avoids re-rendering half the app for a change that only one small piece of UI actually needs.</p>
+    </div>
+
+    <p>Say a search input's typed value only affects the search dropdown — not the entire page header. If that value lives in a top-level app state, every re-render of it re-renders the header, the sidebar, everything. Move it into the search component itself, and only the dropdown re-renders.</p>
+
+    <table class="compare">
+      <thead><tr><th>What</th><th>Local state</th><th>Global state (Redux Toolkit, Zustand)</th></tr></thead>
+      <tbody>
+        <tr><td class="row-label">Best for</td><td class="eks-val">Data one component/subtree cares about</td><td class="local-val">Data many unrelated components need to share</td></tr>
+        <tr><td class="row-label">Re-render impact</td><td class="eks-val">Isolated to that subtree</td><td class="local-val">Can ripple across many components if not scoped carefully</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Simple rule: start with local state (<code>useState</code>) by default. Only lift it up or reach for global state once two or more unrelated components genuinely need to share it.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 14 ================= -->
+  <section class="section" id="context">
+    <div class="section-header">
+      <div class="section-num-big">14</div>
+      <div class="section-title-block">
+        <div class="section-title">Context API Optimization</div>
+        <div class="section-subtitle">Avoiding the "everything re-renders" trap</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Every component that consumes a Context re-renders whenever that context's value changes — even if the component only cares about one small piece of it. On a large context (like a whole "app settings" object), one tiny change can re-render dozens of unrelated components.</p>
+    </div>
+
+    <h3>The problem</h3>
+    <p>Say a single <code>AppContext</code> holds both <code>theme</code> and <code>user</code>. Every component reading <em>either</em> value re-renders whenever <em>either</em> value changes — even a component that only cares about the theme, when the user's name updates.</p>
+
+    <h3>Solution 1 — split contexts</h3>
+    <p>Instead of one giant context, use separate ones: <code>ThemeContext</code> and <code>UserContext</code>. Now a user update only re-renders components subscribed to <code>UserContext</code>.</p>
+
+    <h3>Solution 2 — memoize the provider value</h3>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">ThemeProvider.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> value = useMemo(() => ({ theme }), [theme]);</pre>
+    </div>
+    <p>Without this, the object <code>{ theme }</code> is a brand-new object on every provider render — which forces every consumer to re-render even if <code>theme</code>'s actual value didn't change.</p>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Context is great for rarely-changing global data (theme, authenticated user). For anything that changes frequently (like live form input), prefer local state or a dedicated state library instead.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 15 ================= -->
+  <section class="section" id="debounce">
+    <div class="section-header">
+      <div class="section-num-big">15</div>
+      <div class="section-title-block">
+        <div class="section-title">Debouncing &amp; Throttling</div>
+        <div class="section-subtitle">Controlling how often a function actually runs</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Some events — typing, scrolling, resizing, mouse movement — can fire dozens of times per second. Running an expensive function (like an API call) on every single one wastes bandwidth, hammers your backend, and can even make the UI feel laggy.</p>
+    </div>
+
+    <h3>Debouncing — wait until the user stops</h3>
+    <p>Debouncing delays a function until the triggering event has stopped firing for a bit. Perfect for search boxes.</p>
+
+    <div class="scale-diagram">
+      <span class="red">Without debounce:</span> typing "hello" → 5 API calls<br>
+      <span class="green">With debounce:</span> typing "hello" → 1 API call, after you stop typing
+    </div>
+
+    <p>Best used for: search inputs, API requests triggered by typing, auto-save features.</p>
+
+    <h3>Throttling — limit how often it can run</h3>
+    <p>Throttling instead guarantees a function runs <strong>at most once</strong> per fixed interval, no matter how many times the event fires — useful when you want steady updates, not zero updates until the user stops.</p>
+
+    <p>Best used for: scroll events, resize events, mouse movement tracking.</p>
+
+    <table class="compare">
+      <thead><tr><th>What</th><th>Debounce</th><th>Throttle</th></tr></thead>
+      <tbody>
+        <tr><td class="row-label">Runs</td><td class="eks-val">Once, after activity stops</td><td class="local-val">At most once per interval, continuously</td></tr>
+        <tr><td class="row-label">Best for</td><td class="eks-val">Search, auto-save</td><td class="local-val">Scroll, resize, drag</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= SECTION 16 ================= -->
+  <section class="section" id="api">
+    <div class="section-header">
+      <div class="section-num-big">16</div>
+      <div class="section-title-block">
+        <div class="section-title">API Optimization</div>
+        <div class="section-subtitle">Fetching only what you need, exactly when you need it</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Fetching an entire dataset upfront, re-fetching data you already have, or letting outdated requests overwrite fresh ones all waste bandwidth and slow the app down. These techniques keep network usage lean and data consistent.</p>
+    </div>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">Pagination</span></td><td><span class="f-val">page / limit</span></td><td class="f-desc">Fetches data in fixed-size pages instead of everything at once.</td></tr>
+        <tr><td><span class="f-name">Infinite scrolling</span></td><td><span class="f-val">cursor-based</span></td><td class="f-desc">Loads more data automatically as the user scrolls near the bottom.</td></tr>
+        <tr><td><span class="f-name">Request cancellation</span></td><td><span class="f-val">AbortController</span></td><td class="f-desc">Cancels an in-flight request that's no longer needed (e.g. user typed something new).</td></tr>
+        <tr><td><span class="f-name">Caching</span></td><td><span class="f-val">in-memory / library</span></td><td class="f-desc">Reuses previously fetched data instead of hitting the network again.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn">
+      <div class="note-icon">⚠️</div>
+      <p>Without request cancellation, a fast typist in a search box can trigger several overlapping requests — and if an older, slower request resolves <em>after</em> a newer one, it can overwrite your screen with stale results.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 17 ================= -->
+  <section class="section" id="reactquery">
+    <div class="section-header">
+      <div class="section-num-big">17</div>
+      <div class="section-title-block">
+        <div class="section-title">React Query Optimization</div>
+        <div class="section-subtitle">Letting a library handle server-state caching for you</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Manually handling loading states, caching, re-fetching, and race conditions for every API call gets repetitive and error-prone fast. React Query (TanStack Query) handles all of this consistently, so you write far less boilerplate around every fetch.</p>
+    </div>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">Query caching</span></td><td><span class="f-val">automatic</span></td><td class="f-desc">Stores fetched data by a query key so it can be reused instantly.</td></tr>
+        <tr><td><span class="f-name">staleTime</span></td><td><span class="f-val">ms</span></td><td class="f-desc">How long cached data is considered fresh before React Query considers refetching it.</td></tr>
+        <tr><td><span class="f-name">gcTime</span></td><td><span class="f-val">ms (formerly cacheTime)</span></td><td class="f-desc">How long unused cached data stays in memory before being garbage collected.</td></tr>
+        <tr><td><span class="f-name">Prefetching</span></td><td><span class="f-val">queryClient.prefetchQuery</span></td><td class="f-desc">Loads data before the user even navigates to the page that needs it.</td></tr>
+        <tr><td><span class="f-name">Optimistic updates</span></td><td><span class="f-val">onMutate</span></td><td class="f-desc">Updates the UI immediately, before the server confirms, for a snappier feel.</td></tr>
+        <tr><td><span class="f-name">Background refetching</span></td><td><span class="f-val">automatic</span></td><td class="f-desc">Silently refreshes stale data behind the scenes without blocking the UI.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Think of <code>staleTime</code> as "how long can I trust this data without asking again," and <code>gcTime</code> as "how long do I keep it around in memory just in case it's needed again soon."</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 18 ================= -->
+  <section class="section" id="images">
+    <div class="section-header">
+      <div class="section-num-big">18</div>
+      <div class="section-title-block">
+        <div class="section-title">Image Optimization</div>
+        <div class="section-subtitle">Usually the single biggest thing slowing a page down</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Images are very often the heaviest assets on a page — far bigger than your JavaScript bundle. Optimizing them tends to give the biggest, fastest win for perceived page speed of anything in this note.</p>
+    </div>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">Lazy loading</span></td><td><span class="f-val">loading="lazy"</span></td><td class="f-desc">Delays loading off-screen images until the user scrolls near them.</td></tr>
+        <tr><td><span class="f-name">Modern formats</span></td><td><span class="f-val">WebP / AVIF</span></td><td class="f-desc">Same visual quality at a fraction of the file size of JPEG/PNG.</td></tr>
+        <tr><td><span class="f-name">Compression</span></td><td><span class="f-val">tooling</span></td><td class="f-desc">Reduces file size before the image ever ships.</td></tr>
+        <tr><td><span class="f-name">Responsive images</span></td><td><span class="f-val">srcset</span></td><td class="f-desc">Serves a smaller image to smaller screens instead of one giant image everywhere.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">HTML</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-pipe">&lt;img</span> <span class="c-flag">loading</span>=<span class="c-str">"lazy"</span> <span class="c-pipe">/&gt;</span></pre>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 19 ================= -->
+  <section class="section" id="webvitals">
+    <div class="section-header">
+      <div class="section-num-big">19</div>
+      <div class="section-title-block">
+        <div class="section-title">Web Performance Basics (Core Web Vitals)</div>
+        <div class="section-subtitle">The metrics that actually measure "does this feel fast"</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>"It feels fast to me" isn't measurable or comparable. Core Web Vitals give every team a shared, objective way to measure real user experience — and they directly affect Google search ranking too.</p>
+    </div>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">FCP</span></td><td><span class="f-val">First Contentful Paint</span></td><td class="f-desc">Time until the first bit of content appears on screen.</td></tr>
+        <tr><td><span class="f-name">LCP</span></td><td><span class="f-val">Largest Contentful Paint</span></td><td class="f-desc">Time until the largest visible element (often a hero image) finishes loading.</td></tr>
+        <tr><td><span class="f-name">CLS</span></td><td><span class="f-val">Cumulative Layout Shift</span></td><td class="f-desc">Measures how much content unexpectedly jumps around while loading.</td></tr>
+        <tr><td><span class="f-name">INP</span></td><td><span class="f-val">Interaction to Next Paint</span></td><td class="f-desc">How quickly the page responds after a user click or tap.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Run a <strong>Lighthouse</strong> audit (built into Chrome DevTools) to get a single score plus a breakdown of exactly which of these metrics needs work.</p>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>A common CLS culprit: images without a set width/height, which cause the page to "jump" once the image finishes loading and pushes content down.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 20 ================= -->
+  <section class="section" id="transitions">
+    <div class="section-header">
+      <div class="section-num-big">20</div>
+      <div class="section-title-block">
+        <div class="section-title">useTransition() &amp; useDeferredValue()</div>
+        <div class="section-subtitle">Keeping typing and clicking responsive during heavy updates</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Some UI updates are urgent (a keystroke appearing instantly) and some aren't (re-filtering 10,000 rows after that keystroke). Without a way to tell React which is which, a heavy update can block the input from feeling instant. These two hooks let you mark certain updates as "can wait a moment."</p>
+    </div>
+
+    <h3>useTransition — marking an update as non-urgent</h3>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">SearchResults.jsx</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><span class="c-key">const</span> [isPending, startTransition] = useTransition();</pre>
+    </div>
+    <p>Wrap the expensive state update (like setting filtered results) in <code>startTransition</code>. React keeps the input itself instantly responsive, and shows the heavy update slightly after — <code>isPending</code> lets you show a subtle loading indicator meanwhile.</p>
+
+    <h3>useDeferredValue — deferring a value instead of an update</h3>
+    <p>Similar goal, different API: instead of wrapping the state update, you get a "lagging behind" version of a value that updates a little later than the real one — handy for large filtered lists tied directly to a live search input.</p>
+
+    <p>Useful for: large search results, heavy filtering, anything expensive triggered directly by fast typing.</p>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>Both are part of React's <strong>Concurrent Rendering</strong> features — covered next — which let React pause, interrupt, and resume rendering work instead of blocking everything until it's done.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 21 ================= -->
+  <section class="section" id="ssr">
+    <div class="section-header">
+      <div class="section-num-big">21</div>
+      <div class="section-title-block">
+        <div class="section-title">SSR, Hydration &amp; Concurrent Rendering</div>
+        <div class="section-subtitle">Rendering on the server, then bringing it to life in the browser</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>A pure client-side React app ships a blank page first and builds the UI in the browser — slower first paint, and worse for search engines that don't wait around for JavaScript. Server-Side Rendering sends fully-formed HTML immediately, solving both problems.</p>
+    </div>
+
+    <h3>Server-Side Rendering (SSR)</h3>
+    <p>Commonly implemented using <strong>Next.js</strong>. The server renders your React components into HTML and sends that directly to the browser.</p>
+    <ul>
+      <li>Better SEO — search engines see real content immediately</li>
+      <li>Faster first paint — the user sees something before JS even finishes loading</li>
+      <li>Improved initial load performance overall</li>
+    </ul>
+
+    <h3>Hydration</h3>
+    <p><strong>Hydration</strong> is the step where React attaches its event handlers (onClick, onChange, etc.) to the HTML that the server already sent — turning static-looking markup into a fully interactive React app.</p>
+
+    <h3>Concurrent Rendering</h3>
+    <p>React's modern rendering model, which enables:</p>
+    <ul>
+      <li><strong>Interruptible rendering</strong> — React can pause a render to handle something more urgent, then resume</li>
+      <li><strong>Transitions</strong> — the mechanism behind <code>useTransition</code> from the previous section</li>
+      <li><strong>Better responsiveness</strong> overall, especially under heavy update load</li>
+    </ul>
+
+    <div class="concept">
+      <div class="concept-label">Key Concept</div>
+      <p>SSR gets you fast <strong>first content</strong>. Hydration is what makes that content <strong>interactive</strong>. Concurrent rendering is what keeps the app <strong>responsive</strong> even while doing heavy work. Three different problems, three different solutions.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 22 ================= -->
+  <section class="section" id="jsperf">
+    <div class="section-header">
+      <div class="section-num-big">22</div>
+      <div class="section-title-block">
+        <div class="section-title">JavaScript Performance Basics</div>
+        <div class="section-subtitle">The engine concepts underneath every React optimization</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>React runs on top of plain JavaScript — memoization, debouncing, async data fetching, and even re-rendering itself all ultimately depend on how the JS engine schedules work. Understanding these fundamentals makes every React-specific technique make more sense.</p>
+    </div>
+
+    <table class="flag-table">
+      <thead><tr><th>Flag</th><th>Value Used</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><span class="f-name">Event Loop</span></td><td><span class="f-val">—</span></td><td class="f-desc">Manages the order in which synchronous code, microtasks, and macrotasks run.</td></tr>
+        <tr><td><span class="f-name">Call Stack</span></td><td><span class="f-val">—</span></td><td class="f-desc">Tracks which function is currently running and what called it.</td></tr>
+        <tr><td><span class="f-name">Closures</span></td><td><span class="f-val">—</span></td><td class="f-desc">A function remembering variables from where it was created — the basis of hooks like useState.</td></tr>
+        <tr><td><span class="f-name">Microtasks</span></td><td><span class="f-val">Promises</span></td><td class="f-desc">Run immediately after the current task, before the next macrotask.</td></tr>
+        <tr><td><span class="f-name">Macrotasks</span></td><td><span class="f-val">setTimeout, events</span></td><td class="f-desc">Run after all pending microtasks have finished.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>This is why a <code>setTimeout(fn, 0)</code> doesn't run instantly — it still has to wait for the call stack to clear and any pending microtasks (like Promises) to finish first.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 23 ================= -->
+  <section class="section" id="component-design">
+    <div class="section-header">
+      <div class="section-num-big">23</div>
+      <div class="section-title-block">
+        <div class="section-title">Component Design Optimization</div>
+        <div class="section-subtitle">Structuring components so performance problems don't start in the first place</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>A lot of "performance problems" are really just component design problems — one giant component holding state that only a small part of it needs, forcing everything to re-render together. Good structure prevents the problem before you ever need a hook to fix it.</p>
+    </div>
+
+    <ul>
+      <li><strong>Reusable components</strong> — smaller, focused pieces are easier to memoize and reason about</li>
+      <li><strong>Separation of concerns</strong> — keep data-fetching, layout, and presentation logic separate</li>
+      <li><strong>Lift state only when necessary</strong> — don't move state up "just in case," only when two components truly need to share it</li>
+      <li><strong>Avoid unnecessary prop drilling</strong> — passing props through five layers that don't use them themselves adds coupling and re-render surface area</li>
+    </ul>
+
+    <div class="note">
+      <div class="note-icon">💡</div>
+      <p>If you find yourself reaching for <code>React.memo()</code> everywhere just to survive a component's size, that's often a sign the component itself should be split up.</p>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 24 ================= -->
+  <section class="section" id="checklist">
+    <div class="section-header">
+      <div class="section-num-big">24</div>
+      <div class="section-title-block">
+        <div class="section-title">Interview Checklist &amp; Final Takeaways</div>
+        <div class="section-subtitle">A quick map of everything in this note, by difficulty level</div>
+      </div>
+    </div>
+
+    <div class="why">
+      <div class="why-label">Why We Need This</div>
+      <p>Knowing individual techniques is one thing — being able to explain them clearly and in the right order, under interview pressure, is another. This checklist maps everything you've learned onto the levels interviewers usually expect.</p>
+    </div>
+
+    <table class="compare">
+      <thead><tr><th>Level</th><th>Topics</th></tr></thead>
+      <tbody>
+        <tr><td class="row-label">Beginner</td><td class="eks-val">Re-rendering, Virtual DOM, React.memo()</td></tr>
+        <tr><td class="row-label">Intermediate</td><td class="eks-val">useMemo(), useCallback(), Debouncing, Lazy Loading</td></tr>
+        <tr><td class="row-label">Advanced</td><td class="eks-val">Suspense, Concurrent Rendering, SSR, Hydration, Virtualization, React Query</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Final takeaways</h3>
+    <ul>
+      <li>Understand <em>why</em> a component re-renders before trying to optimize it.</li>
+      <li>Always measure with the Profiler first — don't guess.</li>
+      <li>Use memoization only when it gives a measurable benefit, not by default.</li>
+      <li>Optimize bundle size and API requests — often bigger wins than micro-optimizing components.</li>
+      <li>Build reusable, well-separated components — good structure prevents problems early.</li>
+      <li>Prefer readability over premature optimization.</li>
+    </ul>
+
+    <footer>
+      <span>Sheryians Coding School · React Optimization Notes</span>
+      <span>Measure first, optimize second ⚡</span>
+    </footer>
+  </section>
+
+</main>
+</div>
+
+<div class="watermark">
+  <img src="https://sheryians.com/favicon.ico" alt="" class="watermark-logo" onerror="this.style.display='none'">
+  <span class="watermark-text">Sheryians Coding School</span>
+</div>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    const original = btn.textContent;
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = original, 1500);
+  });
+}
+
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('nav a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top <= 120) current = sec.id;
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+});
+</script>
+</body>
+</html>
