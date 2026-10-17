@@ -9,7 +9,10 @@ const app = express()
 app.use(express.json())
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: [
+    "http://localhost:5173",
+    "https://ai-battle-arena-iota.vercel.app"
+  ],
     methods: ["GET", "POST"],
     credentials: true,
 }))
